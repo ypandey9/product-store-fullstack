@@ -48,3 +48,39 @@ exports.createProduct=async(req,res)=>{
     res.status(500).json({message:"Error creating product"});
  }
 };
+
+exports.updateProduct = async (req, res) => {
+  try {
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true } // VERY IMPORTANT
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(updatedProduct);
+
+  } catch (err) {
+    res.status(500).json({ message: "Error updating product" });
+  }
+};
+
+exports.deleteProduct = async (req, res) => {
+  try {
+
+    const deleted = await Product.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json({ message: "Product deleted" });
+
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting product" });
+  }
+};

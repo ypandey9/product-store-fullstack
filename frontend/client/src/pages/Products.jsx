@@ -12,6 +12,7 @@ function Products() {
   const[name,setName]=useState("");
   const[price,setPrice]=useState("");
   const[category,setCategory]=useState("");
+  const[editingId,setEditingId]=useState(null);
 
 
   const limit = 5;
@@ -31,18 +32,62 @@ function Products() {
   };
 
 
-  const handleAddProduct=async()=>{
+  // const handleAddProduct=async()=>{
+  //   try {
+  //     const res=await API.post("/products",{name,price,category});
+  //   }  catch(err){
+  //     console.log(err.response?.data || err.message);
+  //   }
+  //   setName("");
+  //   setPrice("");
+  //   setCategory("");
+  //   setPage(1);
+  //   fetchProducts();
+  // }
+
+  const handleSaveProduct=async()=>{
     try {
-      const res=await API.post("/products",{name,price,category});
-    }  catch(err){
+      if(editingId){
+        await API.put(`/products/${editingId}`,{
+          name,
+          price:Number(price),
+          category
+        });
+        setEditingId(null);
+      } else {
+        await API.post("/products",{
+          name,
+          price:Number(price),
+          category
+        });
+      }
+
+      setName("");
+      setPrice("");
+      setCategory("");
+      setPage(1);
+
+    }catch(err) {
       console.log(err.response?.data || err.message);
     }
-    setName("");
-    setPrice("");
-    setCategory("");
-    setPage(1);
-    fetchProducts();
-  }
+  };
+
+  const handleDelete=async(id)=>{
+    try {
+      await API.delete(`/products/${id}`);
+      fetchProducts();
+    } catch(err){
+      console.log(err.response?.data || err.message);
+    }
+  };
+
+  const handleEdit=async(product)=>{
+    setEditingId(product._id);
+    setName(product.name);
+    setPrice(product.price);
+    setCategory(product.category);
+  };
+
 
 
   // API call trigger
@@ -98,7 +143,7 @@ function Products() {
       onChange={(e)=>setCategory(e.target.value)}
       />
 
-      <button onClick={handleAddProduct}>Add Product</button>
+      <button onClick={handleSaveProduct}>{editingId ? "Update Product" : "Add Product"}</button>
 
       <h2>Products</h2>
 
@@ -108,6 +153,8 @@ function Products() {
           <h3>{p.name}</h3>
           <p>₹ {p.price}</p>
           <p>{p.category}</p>
+          <button onClick={()=>handleEdit(p)}>Edit</button>
+          <button onClick={()=>handleDelete(p._id)}>Delete</button>
           <hr />
         </div>
       ))}
